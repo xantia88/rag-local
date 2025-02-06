@@ -1,0 +1,6 @@
+langchain-chroma
+langgraph
+sentence-transformers
+langchain-community
+langchain-ollama
+ollama
