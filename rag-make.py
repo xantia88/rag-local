@@ -27,38 +27,11 @@ def request(llm, context, data):
     return text
 
 
-def translate_file(llm, content_file, filepath):
-    content = Path(content_file).read_text()
-    context = (f"Используй следующие термины: {content}."
-               "Cоставь краткое текстовое описание системы на русском языке."
-               "Выведи описание в один абзац.")
-    data = Path(filepath).read_text()
-    return request(llm, context, data)
-
-
 def translate(llm, content, data):
     context = (f"Используй следующие термины: {content}."
                "Cоставь краткое текстовое описание системы на русском языке."
                "Выведи описание в один абзац.")
     return request(llm, context, data)
-
-
-def load_documents2(path, content_file):
-    data = []
-    files = [file for file in listdir(path) if isfile(join(path, file))]
-    for file in files:
-        ext = file.split(".")[1].lower()
-        filepath = join(path, file)
-        if ext == "txt":
-            loader = TextLoader(filepath)
-            doc = loader.load()
-            data.extend(doc)
-        elif ext in ["json", "yaml"]:
-            text = translate_file(llm, content_file, filepath)
-            print(f"[TRANSLATE {filepath}]", text)
-            doc = [Document(page_content=text)]
-            data.extend(doc)
-    return data
 
 
 def load_documents(content_file, terms_file):
