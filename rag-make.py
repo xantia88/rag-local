@@ -1,11 +1,8 @@
 import os
-from os.path import isfile, join
-from os import listdir
 from pathlib import Path
 from dotenv import load_dotenv
 import warnings
 from langchain_ollama import ChatOllama
-from langchain_community.document_loaders import TextLoader
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain.schema.document import Document
