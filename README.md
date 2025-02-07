@@ -1,6 +1,7 @@
 # rag-local
 
 1. Download ollama application from https://ollama.com/download
+
 2. Install llama3 model
 
 ```
@@ -31,12 +32,10 @@ python3 -m venv .venv
 ```
 source .venv/bin/activate
 ```
-git status
+
 7. Install dependencies
 
 ```
 (.venv) pip install -r requirements.txt
 ```
-
-
 
