@@ -2,11 +2,11 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import warnings
-from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain.schema.document import Document
 import json
+from llm import get_model
 
 warnings.filterwarnings("ignore")
 
@@ -34,7 +34,7 @@ def translate(llm, content, data):
     return request(llm, context, data)
 
 
-def load_documents(content_file, terms_file):
+def load_documents(llm, content_file, terms_file):
     documents = []
     with open(content_file, "r") as file:
         objects = json.load(file)
@@ -60,15 +60,12 @@ if __name__ == "__main__":
     load_dotenv()
 
     # initialize LLM object
-    llm = ChatOllama(
-        model=os.environ["model"],
-        temperature=0,
-    )
+    llm = get_model(os.environ)
 
     # load documents
     content_file = "documents/standards.json"
     terms_file = "config/terms-std.txt"
-    documents = load_documents(content_file, terms_file)
+    documents = load_documents(llm, content_file, terms_file)
     print(len(documents), "documents loaded")
 
     # save documents
