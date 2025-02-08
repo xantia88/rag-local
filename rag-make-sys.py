@@ -27,6 +27,8 @@ def request(llm, context, data):
 def translate(llm, content, data):
     context = (f"Используй следующие термины: {content}."
                "Cоставь краткое текстовое описание системы на русском языке."
+               "Используй только ASCII символы в тексте."
+               "Исправь орфографические ошибки в тексте."
                "Выведи описание в один абзац.")
     return request(llm, context, data)
 
@@ -34,10 +36,10 @@ def translate(llm, content, data):
 def load_documents(content_file, terms_file):
     documents = []
     with open(content_file, "r") as file:
-        systems = json.load(file)
+        objects = json.load(file)
         terms = Path(terms_file).read_text()
-        for system in systems:
-            text = translate(llm, terms, str(system))
+        for object in objects:
+            text = translate(llm, terms, str(object))
             print("[TRANSLATE]", text)
             document = [Document(page_content=text)]
             documents.extend(document)
@@ -64,7 +66,7 @@ if __name__ == "__main__":
 
     # load documents
     content_file = "documents/systems.json"
-    terms_file = "config/terms.txt"
+    terms_file = "config/terms-sys.txt"
     documents = load_documents(content_file, terms_file)
     print(len(documents), "documents loaded")
 
