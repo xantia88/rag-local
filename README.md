@@ -6,6 +6,7 @@
 
 ```
 ollama pull llama3
+ollama pull nomic-embed-text
 ```
 
 3. View installed models

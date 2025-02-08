@@ -4,6 +4,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders.csv_loader import CSVLoader
 from langchain_community.document_loaders import UnstructuredHTMLLoader
 from langchain_community.document_loaders import UnstructuredExcelLoader
+from langchain.schema.document import Document
 
 
 def load_txt(file):
@@ -62,6 +63,13 @@ def load_content(dir):
                 documents.extend(docs)
 
     return documents
+
+
+def merge(documents):
+    arr = []
+    for doc in documents:
+        arr.append(doc.page_content)
+    return [Document(page_content="\n\n".join(arr))]
 
 
 if __name__ == "__main__":

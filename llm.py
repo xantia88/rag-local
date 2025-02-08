@@ -1,8 +1,7 @@
-
 from langchain_ollama import ChatOllama
-from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
+from langchain_ollama import OllamaEmbeddings
 
 
 def get_model(env):
@@ -13,7 +12,7 @@ def get_model(env):
 
 
 def get_embeddings(env):
-    return SentenceTransformerEmbeddings(model_name=env.get("embeddings"))
+    return OllamaEmbeddings(model=env.get("embeddings"))
 
 
 def request(llm, context, data):
