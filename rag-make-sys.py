@@ -2,44 +2,29 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import warnings
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.output_parsers import StrOutputParser
 from langchain.schema.document import Document
 import json
-from llm import get_model
+import llm
 
 warnings.filterwarnings("ignore")
 
 
-def request(llm, context, data):
-
-    messages = [
-        SystemMessage(context),
-        HumanMessage(data)
-    ]
-
-    response = llm.invoke(messages)
-    parser = StrOutputParser()
-    text = parser.invoke(response)
-    return text
-
-
-def translate(llm, content, data):
+def translate(model, content, data):
     context = (f"Используй следующие термины: {content}."
                "Cоставь краткое текстовое описание системы на русском языке."
                "Используй только ASCII символы в тексте."
                "Исправь орфографические ошибки в тексте."
                "Выведи описание в один абзац.")
-    return request(llm, context, data)
+    return llm.request(model, context, data)
 
 
-def load_documents(llm, content_file, terms_file):
+def load_documents(model, content_file, terms_file):
     documents = []
     with open(content_file, "r") as file:
         objects = json.load(file)
         terms = Path(terms_file).read_text()
         for object in objects:
-            text = translate(llm, terms, str(object))
+            text = translate(model, terms, str(object))
             print("[TRANSLATE]", text)
             document = [Document(page_content=text)]
             documents.extend(document)
@@ -59,12 +44,12 @@ if __name__ == "__main__":
     load_dotenv()
 
     # initialize LLM object
-    llm = get_model(os.environ)
+    model = llm.get_model(os.environ)
 
     # load documents
     content_file = "documents/systems.json"
     terms_file = "config/terms-sys.txt"
-    documents = load_documents(llm, content_file, terms_file)
+    documents = load_documents(model, content_file, terms_file)
     print(len(documents), "documents loaded")
 
     # save documents
