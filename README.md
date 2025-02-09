@@ -20,6 +20,7 @@ ollama list
 ```
 git clone ...
 cd rag-local
+mkdir logs embeddings
 ```
 
 5. Create python virtual environment
