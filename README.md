@@ -1,4 +1,4 @@
-# rag-local
+# Install
 
 1. Download ollama application from https://ollama.com/download
 
@@ -39,4 +39,43 @@ source .venv/bin/activate
 ```
 (.venv) pip install -r requirements.txt
 ```
+
+# Run
+
+1. Activate python virtual environment
+
+```
+cd rag-local
+source .venv/bin/activate
+```
+
+2. Prepare data and store it as text files in **content/** folder
+
+2.1. Systems
+
+```
+(.venv) python3 rag-make-sys.py
+```
+
+2.2. Standards
+
+```
+(.venv) python3 rag-make-std.py
+```
+
+3. Create embeddings and save them in **embeddings/** folder
+
+```
+(.venv) python3 rag-embeddings.py
+```
+
+4. Perform RAG based request to LLM
+
+```
+(.venv) python3 rag-request.py
+```
+
+# Troubleshooting
+
+See **logs/** for error messages.
 
