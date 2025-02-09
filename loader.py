@@ -58,9 +58,7 @@ def load_content(dir):
                 docs = load_html(file)
             elif extension in [".xls", ".xlsx"]:
                 docs = load_excel(file)
-            if len(docs) > 0:
-                print("load", file, len(docs))
-                documents.extend(docs)
+            documents.extend(docs)
 
     return documents
 

@@ -2,7 +2,7 @@
 
 1. Download ollama application from https://ollama.com/download
 
-2. Install llama3 model
+2. Install llama3 LLM and Nomic embeddings models
 
 ```
 ollama pull llama3

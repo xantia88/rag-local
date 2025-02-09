@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from langchain.schema.document import Document
 import json
 import llm
+from logger import get_logger
 
 
 def translate(model, content, data):
@@ -15,14 +16,14 @@ def translate(model, content, data):
     return llm.request(model, context, data)
 
 
-def load_documents(model, content_file, terms_file):
+def load_documents(model, content_file, terms_file, logger):
     documents = []
     with open(content_file, "r") as file:
         objects = json.load(file)
         terms = Path(terms_file).read_text()
         for object in objects:
             text = translate(model, terms, str(object))
-            print("[TRANSLATE]", text)
+            logger.info(f"[TRANSLATE] {text}")
             document = [Document(page_content=text)]
             documents.extend(document)
     return documents
@@ -37,6 +38,9 @@ def save_documents(documents, filepath):
 
 if __name__ == "__main__":
 
+    # create logger
+    log = get_logger("app", __file__)
+
     # load environment variables
     load_dotenv()
 
@@ -46,10 +50,10 @@ if __name__ == "__main__":
     # load documents
     content_file = "documents/systems.json"
     terms_file = "config/terms-sys.txt"
-    documents = load_documents(model, content_file, terms_file)
-    print(len(documents), "documents loaded")
+    documents = load_documents(model, content_file, terms_file, log)
+    log.info(f"{len(documents)} documents loaded")
 
     # save documents
     file = "content/systems.txt"
     save_documents(documents, file)
-    print("saved to", file)
+    log.info(f" saved to {file}")
