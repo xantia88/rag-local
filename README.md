@@ -51,13 +51,13 @@ source .venv/bin/activate
 
 2. Prepare data and store it as text files in **content/** folder
 
-2.1. Systems
+  - Systems
 
 ```
 (.venv) python3 rag-make-sys.py
 ```
 
-2.2. Standards
+  - Standards
 
 ```
 (.venv) python3 rag-make-std.py
