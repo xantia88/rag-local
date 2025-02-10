@@ -26,10 +26,10 @@ if __name__ == "__main__":
 
     # request / response
     qa_chain = RetrievalQA.from_chain_type(
-        model, retriever=db.as_retriever(search_kwargs={"k": 10}))
+        model, retriever=db.as_retriever(search_kwargs={"k": 4}))
 
     # request
-    question = ("Сформируй список внешних систем."
+    question = ("Сколько внешних систем? "
                 "Отвечай на русском языке.")
     log.info(f"[QUESTION] {question}")
 
