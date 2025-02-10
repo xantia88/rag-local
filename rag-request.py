@@ -29,7 +29,7 @@ if __name__ == "__main__":
         model, retriever=db.as_retriever(search_kwargs={"k": 4}))
 
     # request
-    question = ("Сколько внешних систем? "
+    question = ("что такое шлюз фиас? "
                 "Отвечай на русском языке.")
     log.info(f"[QUESTION] {question}")
 
