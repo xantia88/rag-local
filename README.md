@@ -52,17 +52,20 @@ source .venv/bin/activate
 
 2. Prepare data and store it as text files in **content/** folder
 
-  - Systems
+Run scripts in any order to transform JSON source documents into text documents using relevant context files. 
 
 ```
-(.venv) python3 rag-make-sys.py
+(.venv) python3 <script>
 ```
 
-  - Standards
+|Source|Script|Context|Output|
+|------|----|-------|------|
+|documents/standards.json|rag-make-std.py|config/std.txt|content/standards.txt|
+|documents/requirements.json|rag-make-req.py|config-req.txt|content/requirements.txt|
+|documents/systems.json|rag-make-sys.py|config/sys.txt|content/systems.txt|
+|documents/issues.json|rag-make-iss.py|config/iss.txt|content/issues.txt|
 
-```
-(.venv) python3 rag-make-std.py
-```
+
 
 3. Create embeddings and save them in **embeddings/** folder
 
@@ -70,7 +73,13 @@ source .venv/bin/activate
 (.venv) python3 rag-embeddings.py
 ```
 
-4. Perform RAG based request to LLM
+4. Query embeddings
+
+```
+(.venv) python3 rag-query.py
+```
+
+5. Perform RAG based request to LLM
 
 ```
 (.venv) python3 rag-request.py
