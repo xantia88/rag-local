@@ -60,10 +60,10 @@ Run scripts in any order to transform JSON source documents into text documents 
 
 |Source|Script|Context|Output|
 |------|----|-------|------|
-|documents/standards.json|rag-make-std.py|config/std.txt|content/standards.txt|
-|documents/requirements.json|rag-make-req.py|config-req.txt|content/requirements.txt|
-|documents/systems.json|rag-make-sys.py|config/sys.txt|content/systems.txt|
-|documents/issues.json|rag-make-iss.py|config/iss.txt|content/issues.txt|
+|documents/standards.json|rag-make-std.py|config/terms-std.txt|content/standards.txt|
+|documents/requirements.json|rag-make-req.py|config/terms-req.txt|content/requirements.txt|
+|documents/systems.json|rag-make-sys.py|config/terms-sys.txt|content/systems.txt|
+|documents/issues.json|rag-make-iss.py|config/terms-iss.txt|content/issues.txt|
 
 
 

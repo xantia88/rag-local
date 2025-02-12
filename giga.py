@@ -1,21 +1,24 @@
-from langchain_ollama import ChatOllama
+
+from langchain_gigachat.chat_models import GigaChat
+from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_ollama import OllamaEmbeddings
 from logger import get_silent_logger
 
 log = get_silent_logger("llm", __file__)
 
 
 def get_model(env):
-    return ChatOllama(
-        model=env.get("model"),
-        temperature=0,
+    return GigaChat(
+        credentials=env.get("giga.auth_key"),
+        scope=env.get("giga.scope"),
+        model=env.get("giga.model"),
+        verify_ssl_certs=False,
     )
 
 
 def get_embeddings(env):
-    return OllamaEmbeddings(model=env.get("embeddings"))
+    return SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
 def request(llm, context, data):

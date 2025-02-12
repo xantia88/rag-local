@@ -3,8 +3,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain.schema.document import Document
 import json
-import llm
 from logger import get_logger
+import importlib
 
 
 def translate(model, content, data):
@@ -47,6 +47,10 @@ if __name__ == "__main__":
 
     # load environment variables
     load_dotenv()
+
+    # import llm
+    name = os.environ.get("llm.module")
+    llm = importlib.import_module(name)
 
     # initialize LLM object
     model = llm.get_model(os.environ)

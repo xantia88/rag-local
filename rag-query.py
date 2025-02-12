@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import warnings
 from langchain_chroma import Chroma
 from logger import get_logger
-import llm
+import importlib
 
 warnings.filterwarnings("ignore")
 
@@ -14,6 +14,10 @@ if __name__ == "__main__":
 
     # load environment variables
     load_dotenv()
+
+    # import llm
+    name = os.environ.get("llm.module")
+    llm = importlib.import_module(name)
 
     # create embeddings and save to local filesystem
     dir = "embeddings"

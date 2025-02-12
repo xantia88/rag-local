@@ -1,9 +1,15 @@
 langchain-chroma
 langgraph
-sentence-transformers
 langchain-community
-langchain-ollama
+
+# llama imports
 ollama
+langchain-ollama
+
+# giga imports
+#langchain-gigachat
+#sentence-transformers
+
 unstructured
 openpyxl
 pandas
