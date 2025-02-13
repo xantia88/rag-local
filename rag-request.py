@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import warnings
 from langchain.chains import RetrievalQA
 from langchain_chroma import Chroma
+from langchain.retrievers import EnsembleRetriever
 from logger import get_logger
 import importlib
 
@@ -28,9 +29,21 @@ if __name__ == "__main__":
     # initialize LLM object
     model = llm.get_model(os.environ)
 
+    # similarity search
+    vanilla = db.as_retriever(
+        search_type="similarity", search_kwargs={"k": 4})
+
+    # maximum marginal relevance
+    mmr = db.as_retriever(
+        search_type="mmr", search_kwargs={"k": 4})
+
+    # create retriever
+    ensemble_retriever = EnsembleRetriever(
+        retrievers=[vanilla, mmr], weights=[0.5, 0.5])
+
     # request / response
     qa_chain = RetrievalQA.from_chain_type(
-        model, retriever=db.as_retriever(search_kwargs={"k": 4}))
+        model, retriever=ensemble_retriever)
 
     # request
     question = ("что такое шлюз фиас? "

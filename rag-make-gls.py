@@ -1,24 +1,43 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from langchain.schema.document import Document
+import json
 from logger import get_logger
 import importlib
 
 
-def translate(model, data):
-    context = ("Ты - русскоязычный ассистент. "
-               "В документе содержится глоссарий терминов. "
-               # "Для каждого термина, который указан в глоссарии, сформируй JSON документ. "
-               # "В качестве названия параметров в JSON документе используй названия параметров, которые указанны в глоссарии. "
-               "Для каждого термина, который указан в глоссарии, сформируй текстовое описание на русском языке. "
-               "Описание должно включать все параметры, которые указаны в глоссарии для данного термина. "
-               # "В качестве названия параметров в JSON документе используй названия параметров, которые указанны в глоссарии. "
-               "Исправь орфографические ошибки в тексте. "
-               "Используй только ASCII символы. "
-               # "Выведи ответ в виде массива JSON документов. "
-               "Выведи ответ ввиде списка абзацев, разделенных пустой строкой."
-               )
+def translate(model, content, data):
+    context = ("Используй следующий контекст:"
+               "\n\n"
+               f"{content}"
+               "\n\n"
+               "Это описание термина для глоссария в формате JSON. "
+               "Cоставь текстовое описание этого термина на русском языке."
+               "Используй только ASCII символы в тексте."
+               "Исправь орфографические ошибки в тексте."
+               "Выведи ответ в один абзац.")
     return llm.request(model, context, data)
+
+
+def load_documents(model, content_file, terms_file, log):
+    documents = []
+    with open(content_file, "r") as file:
+        objects = json.load(file)
+        terms = Path(terms_file).read_text()
+        for object in objects:
+            text = translate(model, terms, str(object))
+            log.info(f"[TRANSLATE] {text}")
+            document = [Document(page_content=text)]
+            documents.extend(document)
+    return documents
+
+
+def save_documents(documents, filepath):
+    with open(filepath, "w") as file:
+        for document in documents:
+            file.write(document.page_content)
+            file.write("\n")
 
 
 if __name__ == "__main__":
@@ -29,7 +48,7 @@ if __name__ == "__main__":
     # load environment variables
     load_dotenv()
 
-    # import llm module
+    # import llm
     name = os.environ.get("llm.module")
     llm = importlib.import_module(name)
 
@@ -37,8 +56,12 @@ if __name__ == "__main__":
     model = llm.get_model(os.environ)
 
     # load documents
-    content_file = "documents/glossary-test.txt"
-    data = Path(content_file).read_text()
+    content_file = "documents/glossary.json"
+    terms_file = "config/terms-gls.txt"
+    documents = load_documents(model, content_file, terms_file, log)
+    log.info(f"{len(documents)} documents loaded")
 
-    response = translate(model, data)
-    print(response)
+    # save documents
+    file = "content/glossary.txt"
+    save_documents(documents, file)
+    log.info(f"saved to {file}")

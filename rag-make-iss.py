@@ -8,7 +8,7 @@ import importlib
 
 
 def translate(model, content, data):
-    context = ("Используй следующие термины:"
+    context = ("Используй следующий контекст:"
                "\n\n"
                f"{content}"
                "\n\n"
