@@ -4,6 +4,7 @@ import warnings
 from langchain.chains import RetrievalQA
 from langchain_chroma import Chroma
 from langchain.retrievers import EnsembleRetriever
+from langchain_community.retrievers import BM25Retriever
 from logger import get_logger
 import importlib
 
@@ -33,20 +34,20 @@ if __name__ == "__main__":
     vanilla = db.as_retriever(
         search_type="similarity", search_kwargs={"k": 4})
 
-    # maximum marginal relevance
-    mmr = db.as_retriever(
-        search_type="mmr", search_kwargs={"k": 4})
+    # B25 Match
+    chunks = db.get()["documents"]
+    b25m = BM25Retriever.from_texts(chunks, k=4)
 
     # create retriever
-    ensemble_retriever = EnsembleRetriever(
-        retrievers=[vanilla, mmr], weights=[0.5, 0.5])
+    ensemble = EnsembleRetriever(
+        retrievers=[vanilla, b25m], weights=[0.5, 0.5])
 
     # request / response
     qa_chain = RetrievalQA.from_chain_type(
-        model, retriever=ensemble_retriever)
+        model, retriever=ensemble)
 
     # request
-    question = ("что такое шлюз фиас? "
+    question = ("что такое шлюз фиас ?"
                 "Отвечай на русском языке.")
     log.info(f"[QUESTION] {question}")
 

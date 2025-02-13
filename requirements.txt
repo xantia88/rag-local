@@ -1,6 +1,7 @@
 langchain-chroma
 langgraph
 langchain-community
+rank-bm25
 
 # llama imports
 ollama
