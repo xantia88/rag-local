@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 import warnings
-from langchain.chains import RetrievalQA
 from langchain_chroma import Chroma
 from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
@@ -42,10 +41,6 @@ if __name__ == "__main__":
     # create retriever
     ensemble = EnsembleRetriever(
         retrievers=[vanilla, b25m], weights=[0.5, 0.5])
-
-    # request / response
-    qa_chain = RetrievalQA.from_chain_type(
-        model, retriever=ensemble)
 
     # request
     question = "что такое шлюз фиас ?"
