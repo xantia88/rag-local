@@ -8,6 +8,7 @@ from langchain_community.retrievers import BM25Retriever
 from logger import get_logger
 import importlib
 
+
 warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
@@ -47,11 +48,19 @@ if __name__ == "__main__":
         model, retriever=ensemble)
 
     # request
-    question = ("что такое шлюз фиас ?"
-                "Отвечай на русском языке.")
+    question = "что такое шлюз фиас ?"
     log.info(f"[QUESTION] {question}")
 
-    # response
-    response = qa_chain({"query": question})
-    answer = response["result"]
+    # retrieve documents
+    documents = ensemble.invoke(question)
+    texts = [document.page_content for document in documents]
+    context = "\n\n".join(texts)
+
+    # generate answer with LLM
+    context = (f"Используй следующий контекст:"
+               "\n\n"
+               f"{context}"
+               "\n\n"
+               "Ответь на вопрос пользователя на русском языке.")
+    answer = llm.request(model, context, question)
     log.info(f"[ANSWER] {answer}")
