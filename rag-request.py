@@ -10,6 +10,7 @@ import importlib
 
 warnings.filterwarnings("ignore")
 
+
 if __name__ == "__main__":
 
     # create logger
@@ -43,11 +44,12 @@ if __name__ == "__main__":
         retrievers=[vanilla, b25m], weights=[0.5, 0.5])
 
     # request
-    question = "что такое шлюз фиас ?"
+    question = "требования для Mission Critical"
     log.info(f"[QUESTION] {question}")
 
     # retrieve documents
     documents = ensemble.invoke(question)
+    print(f"{len(documents)} found")
     texts = [document.page_content for document in documents]
     context = "\n\n".join(texts)
 
