@@ -6,11 +6,18 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from loader import load_content
 from logger import get_logger
 import importlib
+import shutil
 
 warnings.filterwarnings("ignore")
 
 
 if __name__ == "__main__":
+
+    # clean folder
+    dir = "embeddings"
+    if os.path.isdir(dir):
+        shutil.rmtree(dir)
+    os.mkdir(dir)
 
     # create logger
     log = get_logger("app", __file__)
@@ -35,7 +42,6 @@ if __name__ == "__main__":
     llm = importlib.import_module(name)
 
     # create embeddings and save to local filesystem
-    dir = "embeddings"
     embeddings = llm.get_embeddings(os.environ)
     db = Chroma.from_documents(persist_directory=dir,
                                documents=documents,
