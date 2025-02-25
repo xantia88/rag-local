@@ -76,7 +76,7 @@ Run scripts in any order to transform JSON source documents into text documents 
 4. Query embeddings
 
 ```
-(.venv) python3 rag-query.py
+(.venv) python3 rag-query.py prompts/test.txt
 ```
 
 5. Perform RAG based request to LLM
