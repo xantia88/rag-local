@@ -9,7 +9,6 @@ langchain-ollama
 
 # giga imports
 #langchain-gigachat
-#sentence-transformers
 
 unstructured
 openpyxl
