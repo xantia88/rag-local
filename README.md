@@ -82,7 +82,7 @@ Run scripts in any order to transform JSON source documents into text documents 
 5. Perform RAG based request to LLM
 
 ```
-(.venv) python3 rag-request.py
+(.venv) python3 rag-request.py prompts/test.txt
 ```
 
 # Troubleshooting
