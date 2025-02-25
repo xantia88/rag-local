@@ -8,6 +8,7 @@ from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from logger import get_logger
 import importlib
+import json
 
 warnings.filterwarnings("ignore")
 
@@ -16,6 +17,17 @@ search_config = {
     "text": 4,
     "weights": [0.5, 0.5]
 }
+
+
+def get_request_data(file):
+    if file.endswith(".txt"):
+        return Path(file).read_text(), None
+    elif file.endswith(".json"):
+        with open(file, "r") as file:
+            request = json.load(file)
+            file = request["text"]
+            return Path(file).read_text(), request["source"]
+
 
 if __name__ == "__main__":
 
@@ -27,6 +39,11 @@ if __name__ == "__main__":
 
         # load environment variables
         load_dotenv()
+
+        # read prompt file
+        question, sources = get_request_data(sys.argv[1])
+        log.info(f"[QUESTION] {question}")
+        log.info(f"[SOURCES] {sources}")
 
         # import llm
         name = os.environ.get("llm.module")
@@ -41,8 +58,14 @@ if __name__ == "__main__":
         model = llm.get_model(os.environ)
 
         # similarity search
-        vanilla = db.as_retriever(
-            search_type="similarity", search_kwargs={"k": search_config["semantic"]})
+        args = {"k": search_config["semantic"]}
+        if sources is not None:
+            args["filter"] = {
+                "source": {
+                    "$in": sources
+                }
+            }
+        vanilla = db.as_retriever(search_type="similarity", search_kwargs=args)
 
         # B25 Match
         chunks = db.get()["documents"]
@@ -51,10 +74,6 @@ if __name__ == "__main__":
         # create retriever
         ensemble = EnsembleRetriever(
             retrievers=[vanilla, b25m], weights=search_config["weights"])
-
-        # read prompt file
-        question = Path(sys.argv[1]).read_text()
-        log.info(f"[QUESTION] {question}")
 
         # retrieve documents
         documents = ensemble.invoke(question)

@@ -55,7 +55,7 @@ source .venv/bin/activate
 Run scripts in any order to transform JSON source documents into text documents using relevant context files. 
 
 ```
-(.venv) python3 <script>
+(.venv) python <script>
 ```
 
 |Source|Script|Context|Output|
@@ -66,20 +66,25 @@ Run scripts in any order to transform JSON source documents into text documents 
 |documents/issues.json|rag-make-iss.py|config/terms-iss.txt|content/issues.txt|
 
 
-
 3. Create embeddings and save them in **embeddings/** folder
 
 ```
-(.venv) python3 rag-embeddings.py
+(.venv) python rag-embeddings.py
 ```
 
-4. Query embeddings
+4. Symantic search
 
 ```
-(.venv) python3 rag-query.py prompts/test.txt
+(.venv) python rag-query.py -f prompts/test.txt -m symantic 
 ```
 
-5. Perform RAG based request to LLM
+5. Text search
+
+```
+(.venv) python rag-query.py -f prompts/test.txt -m text
+```
+
+6. Perform RAG based request to LLM
 
 ```
 (.venv) python3 rag-request.py prompts/test.txt

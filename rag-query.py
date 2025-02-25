@@ -7,6 +7,7 @@ from langchain_chroma import Chroma
 from logger import get_logger
 import importlib
 from langchain_community.retrievers import BM25Retriever
+import json
 
 warnings.filterwarnings("ignore")
 
@@ -21,6 +22,16 @@ def get_param(name):
         pos = sys.argv.index(name)
         return sys.argv[pos+1]
     return None
+
+
+def get_request_data(file):
+    if file.endswith(".txt"):
+        return Path(file).read_text(), None
+    elif file.endswith(".json"):
+        with open(file, "r") as file:
+            request = json.load(file)
+            file = request["text"]
+            return Path(file).read_text(), request["source"]
 
 
 if __name__ == "__main__":
@@ -47,15 +58,25 @@ if __name__ == "__main__":
             embeddings = llm.get_embeddings(os.environ)
             db = Chroma(persist_directory=dir, embedding_function=embeddings)
 
-            # retrieve data from vectorstore
-            question = Path(prompt_file).read_text()
+            # prepare request
+            question, sources = get_request_data(prompt_file)
 
+            # quesry
             if search_mode in search_config:
                 limit = search_config[search_mode]
                 # semantic search
                 if search_mode == "semantic":
-                    documents = db.similarity_search(question, k=limit)
-                    for document in documents:
+
+                    args = {"k": limit}
+                    if sources is not None:
+                        args["filter"] = {
+                            "source": {
+                                "$in": sources
+                            }
+                        }
+
+                    retriever = db.as_retriever(search_kwargs=args)
+                    for document in retriever.invoke(question):
                         print(document)
                         print("---")
                 # text search
