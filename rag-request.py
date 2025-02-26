@@ -52,12 +52,12 @@ if __name__ == "__main__":
         name = os.environ.get("llm.module")
         llm = importlib.import_module(name)
 
-        # create embeddings and save to local filesystem
+        # load embeddings
         dir = "embeddings"
         embeddings = llm.get_embeddings(os.environ)
         db = Chroma(persist_directory=dir, embedding_function=embeddings)
 
-        # similarity search
+        # semantic search parameters
         args = {}
         args["k"] = search_config["semantic"]
         args["score_threshold"] = search_config["threshold"]
@@ -68,6 +68,7 @@ if __name__ == "__main__":
                 }
             }
 
+        # retrieve relevant documents via semantic search
         semantic = db.as_retriever(
             search_type="similarity_score_threshold", search_kwargs=args)
         relevant_documents = semantic.invoke(question)
@@ -77,28 +78,31 @@ if __name__ == "__main__":
 
         if (len(relevant_documents) > 0):
 
+            # extract sources
             relevant_sources = {doc.metadata['source']
                                 for doc in relevant_documents}
             relevant_sources = list(relevant_sources)
 
             log.info(f"{relevant_sources} - relevant sources")
 
+            # text search parameters
             where_clause = {
                 "source": {
                     "$in": relevant_sources
                 }
             }
 
+            # get all chunks for the sources of relevant documents
             collection = db.get(
                 where=where_clause, include=["documents"])
             chunks = [Document(page_content=text)
                       for text in collection['documents']]
 
+            # create text retriever
             bm25 = BM25Retriever.from_documents(
                 chunks, k=search_config["text"])
-            documents = bm25.invoke(question)
 
-            # create retriever
+            # create ensemble retriever
             ensemble = EnsembleRetriever(
                 retrievers=[semantic, bm25], weights=search_config["weights"])
 
