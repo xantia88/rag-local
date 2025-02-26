@@ -59,13 +59,15 @@ if __name__ == "__main__":
 
         # similarity search
         args = {"k": search_config["semantic"]}
+        args["score_threshold"] = 0.5
         if sources is not None:
             args["filter"] = {
                 "source": {
                     "$in": sources
                 }
             }
-        vanilla = db.as_retriever(search_type="similarity", search_kwargs=args)
+        vanilla = db.as_retriever(
+            search_type="similarity_score_threshold", search_kwargs=args)
 
         # B25 Match
         chunks = db.get()["documents"]

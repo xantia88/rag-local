@@ -68,6 +68,7 @@ if __name__ == "__main__":
                 if search_mode == "semantic":
 
                     args = {"k": limit}
+                    args["score_threshold"] = 0.5
                     if sources is not None:
                         args["filter"] = {
                             "source": {
@@ -75,7 +76,8 @@ if __name__ == "__main__":
                             }
                         }
 
-                    retriever = db.as_retriever(search_kwargs=args)
+                    retriever = db.as_retriever(
+                        search_type="similarity_score_threshold", search_kwargs=args)
                     for document in retriever.invoke(question):
                         print(document)
                         print("---")
