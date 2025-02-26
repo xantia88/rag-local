@@ -1,1 +1,1 @@
-требования для Mission Critical
+требования стандартов для Mission Critical

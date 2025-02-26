@@ -1,6 +1,7 @@
 {
     "text": "prompts/data.txt",
     "source": [
+        "content/standards.txt",
         "content/glossary.txt",
         "content/systems.txt"
     ]

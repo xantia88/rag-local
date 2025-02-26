@@ -7,13 +7,16 @@ from langchain_chroma import Chroma
 from logger import get_logger
 import importlib
 from langchain_community.retrievers import BM25Retriever
+from langchain.schema.document import Document
 import json
+
 
 warnings.filterwarnings("ignore")
 
 search_config = {
-    "semantic": 4,
-    "text": 4
+    "semantic": 10,
+    "threshold": 0.5,
+    "text": 3
 }
 
 
@@ -32,6 +35,13 @@ def get_request_data(file):
             request = json.load(file)
             file = request["text"]
             return Path(file).read_text(), request["source"]
+
+
+def show(documents):
+    log.info(f"{len(documents)} found")
+    for document in documents:
+        print(document)
+        print("---")
 
 
 if __name__ == "__main__":
@@ -63,31 +73,54 @@ if __name__ == "__main__":
 
             # quesry
             if search_mode in search_config:
-                limit = search_config[search_mode]
-                # semantic search
-                if search_mode == "semantic":
 
-                    args = {"k": limit}
-                    args["score_threshold"] = 0.5
-                    if sources is not None:
-                        args["filter"] = {
+                # semantic search
+                args = {}
+                args["k"] = search_config["semantic"]
+                args["score_threshold"] = search_config["threshold"]
+                if sources is not None:
+                    args["filter"] = {
+                        "source": {
+                            "$in": sources
+                        }
+                    }
+
+                retriever = db.as_retriever(
+                    search_type="similarity_score_threshold", search_kwargs=args)
+                relevant_documents = retriever.invoke(question)
+
+                if search_mode == "semantic":
+                    show(relevant_documents)
+
+                # text search
+                if search_mode == "text":
+
+                    log.info(
+                        f"{len(relevant_documents)} relevant documents found")
+
+                    if (len(relevant_documents) > 0):
+
+                        relevant_sources = {
+                            doc.metadata['source'] for doc in relevant_documents}
+
+                        log.info(f"{relevant_sources} - relevant sources")
+
+                        where_clause = {
                             "source": {
-                                "$in": sources
+                                "$in": list(relevant_sources)
                             }
                         }
 
-                    retriever = db.as_retriever(
-                        search_type="similarity_score_threshold", search_kwargs=args)
-                    for document in retriever.invoke(question):
-                        print(document)
-                        print("---")
-                # text search
-                elif search_mode == "text":
-                    chunks = db.get()["documents"]
-                    b25m = BM25Retriever.from_texts(chunks, k=limit)
-                    for document in b25m.invoke(question):
-                        print(document)
-                        print("---")
+                        collection = db.get(
+                            where=where_clause, include=["documents"])
+                        chunks = [Document(page_content=text)
+                                  for text in collection['documents']]
+
+                        bm25 = BM25Retriever.from_documents(
+                            chunks, k=search_config["text"])
+                        documents = bm25.invoke(question)
+                        show(documents)
+
             else:
                 log.error(
                     f"Unknown mode: {search_mode}, use {list(search_config.keys())}")

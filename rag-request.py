@@ -1,3 +1,4 @@
+from langchain.prompts import ChatPromptTemplate
 import os
 import sys
 from pathlib import Path
@@ -6,6 +7,7 @@ import warnings
 from langchain_chroma import Chroma
 from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
+from langchain.schema.document import Document
 from logger import get_logger
 import importlib
 import json
@@ -13,9 +15,10 @@ import json
 warnings.filterwarnings("ignore")
 
 search_config = {
-    "semantic": 4,
-    "text": 4,
-    "weights": [0.5, 0.5]
+    "semantic": 10,
+    "threshold": 0.5,
+    "text": 3,
+    "weights": [0.7, 0.3]
 }
 
 
@@ -54,43 +57,75 @@ if __name__ == "__main__":
         embeddings = llm.get_embeddings(os.environ)
         db = Chroma(persist_directory=dir, embedding_function=embeddings)
 
-        # initialize LLM object
-        model = llm.get_model(os.environ)
-
         # similarity search
-        args = {"k": search_config["semantic"]}
-        args["score_threshold"] = 0.5
+        args = {}
+        args["k"] = search_config["semantic"]
+        args["score_threshold"] = search_config["threshold"]
         if sources is not None:
             args["filter"] = {
                 "source": {
                     "$in": sources
                 }
             }
-        vanilla = db.as_retriever(
+
+        semantic = db.as_retriever(
             search_type="similarity_score_threshold", search_kwargs=args)
+        relevant_documents = semantic.invoke(question)
 
-        # B25 Match
-        chunks = db.get()["documents"]
-        b25m = BM25Retriever.from_texts(chunks, k=search_config["text"])
+        log.info(
+            f"{len(relevant_documents)} relevant documents found")
 
-        # create retriever
-        ensemble = EnsembleRetriever(
-            retrievers=[vanilla, b25m], weights=search_config["weights"])
+        if (len(relevant_documents) > 0):
 
-        # retrieve documents
-        documents = ensemble.invoke(question)
-        print(f"{len(documents)} found")
-        texts = [document.page_content for document in documents]
-        context = "\n\n".join(texts)
+            relevant_sources = {doc.metadata['source']
+                                for doc in relevant_documents}
+            relevant_sources = list(relevant_sources)
 
-        # generate answer with LLM
-        context = (f"Используй следующий контекст:"
-                   "\n\n"
-                   f"{context}"
-                   "\n\n"
-                   "Ответь на вопрос пользователя на русском языке.")
-        answer = llm.request(model, context, question)
-        log.info(f"[ANSWER] {answer}")
+            log.info(f"{relevant_sources} - relevant sources")
+
+            where_clause = {
+                "source": {
+                    "$in": relevant_sources
+                }
+            }
+
+            collection = db.get(
+                where=where_clause, include=["documents"])
+            chunks = [Document(page_content=text)
+                      for text in collection['documents']]
+
+            bm25 = BM25Retriever.from_documents(
+                chunks, k=search_config["text"])
+            documents = bm25.invoke(question)
+
+            # create retriever
+            ensemble = EnsembleRetriever(
+                retrievers=[semantic, bm25], weights=search_config["weights"])
+
+            # retrieve documents
+            documents = ensemble.invoke(question)
+            log.info(f"{len(documents)} documents found via ensemble")
+
+            # extract texts
+            texts = [document.page_content for document in documents]
+            context_text = "\n\n".join(texts)
+
+            # execute prompt
+            prompt_template = """
+                Для ответа на вопрос используй только следующий контекст:
+
+                {context}
+
+                ---
+
+                Ответь на вопрос используя указанный контекст: {query}
+                """
+            prompt_template = ChatPromptTemplate.from_template(prompt_template)
+            prompt = prompt_template.format(
+                context=context_text, query=question)
+            model = llm.get_model(os.environ)
+            response = model.invoke(prompt)
+            print(response.content)
 
     else:
         log.error("No prompt file provided")
