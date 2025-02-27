@@ -116,6 +116,7 @@ if __name__ == "__main__":
                         chunks = [Document(page_content=text)
                                   for text in collection['documents']]
 
+                        print(len(chunks))
                         bm25 = BM25Retriever.from_documents(
                             chunks, k=search_config["text"])
                         documents = bm25.invoke(question)

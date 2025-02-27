@@ -1,3 +1,4 @@
 {
-    "editor.parameterHints.enabled": false
+    "editor.parameterHints.enabled": false,
+    "editor.suggest.showWords": false
 }

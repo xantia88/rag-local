@@ -121,8 +121,8 @@ if __name__ == "__main__":
                 {context}
 
                 ---
-
                 Ответь на вопрос используя указанный контекст: {query}
+                Для ответа используй русский язык.
                 """
             prompt_template = ChatPromptTemplate.from_template(prompt_template)
             prompt = prompt_template.format(
