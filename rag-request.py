@@ -79,7 +79,7 @@ if __name__ == "__main__":
         if (len(relevant_documents) > 0):
 
             # extract sources
-            relevant_sources = {doc.metadata['source'] 
+            relevant_sources = {doc.metadata['source']
                                 for doc in relevant_documents}
             relevant_sources = list(relevant_sources)
 
@@ -93,9 +93,8 @@ if __name__ == "__main__":
             }
 
             # get all chunks for the sources of relevant documents
-            collection = db.get(
-                where=where_clause, include=["documents"])
-            chunks = [Document(page_content=text) 
+            collection = db.get(where=where_clause, include=["documents"])
+            chunks = [Document(page_content=text)
                       for text in collection['documents']]
 
             # create text retriever
@@ -127,6 +126,7 @@ if __name__ == "__main__":
             prompt_template = ChatPromptTemplate.from_template(prompt_template)
             prompt = prompt_template.format(
                 context=context_text, query=question)
+
             log.info("start request")
             model = llm.get_model(os.environ)
             response = model.invoke(prompt)

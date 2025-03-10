@@ -40,12 +40,5 @@ def load_content(dir):
     return documents
 
 
-def merge(documents):
-    arr = []
-    for doc in documents:
-        arr.append(doc.page_content)
-    return [Document(page_content="\n\n".join(arr))]
-
-
 if __name__ == "__main__":
     exit()

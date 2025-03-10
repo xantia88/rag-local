@@ -70,6 +70,8 @@ if __name__ == "__main__":
 
             # prepare request
             question, sources = get_request_data(prompt_file)
+            log.info(f"[QUESTION] {question}")
+            log.info(f"[SOURCES] {sources}")
 
             # quesry
             if search_mode in search_config:
@@ -85,8 +87,7 @@ if __name__ == "__main__":
                         }
                     }
 
-                retriever = db.as_retriever(
-                    search_type="similarity_score_threshold", search_kwargs=args)
+                retriever = db.as_retriever(search_type="similarity_score_threshold", search_kwargs=args)
                 relevant_documents = retriever.invoke(question)
 
                 if search_mode == "semantic":
@@ -95,13 +96,11 @@ if __name__ == "__main__":
                 # text search
                 if search_mode == "text":
 
-                    log.info(
-                        f"{len(relevant_documents)} relevant documents found")
+                    log.info(f"{len(relevant_documents)} relevant documents found")
 
                     if (len(relevant_documents) > 0):
 
-                        relevant_sources = {
-                            doc.metadata['source'] for doc in relevant_documents}
+                        relevant_sources = {doc.metadata['source'] for doc in relevant_documents}
 
                         log.info(f"{relevant_sources} - relevant sources")
 
@@ -111,24 +110,19 @@ if __name__ == "__main__":
                             }
                         }
 
-                        collection = db.get(
-                            where=where_clause, include=["documents"])
-                        chunks = [Document(page_content=text)
-                                  for text in collection['documents']]
+                        collection = db.get(where=where_clause, include=["documents"])
+                        chunks = [Document(page_content=text) for text in collection['documents']]
 
                         print(len(chunks))
-                        bm25 = BM25Retriever.from_documents(
-                            chunks, k=search_config["text"])
+                        bm25 = BM25Retriever.from_documents(chunks, k=search_config["text"])
                         documents = bm25.invoke(question)
                         show(documents)
 
             else:
-                log.error(
-                    f"Unknown mode: {search_mode}, use {list(search_config.keys())}")
+                log.error(f"Unknown mode: {search_mode}, use {list(search_config.keys())}")
 
         else:
-            log.error(
-                f"Use -f to for prompt file ({prompt_file}), -m for search mode ({search_mode})")
+            log.error(f"Use -f to for prompt file ({prompt_file}), -m for search mode ({search_mode})")
 
     else:
         log.error("Prompt file (-f) and search mode (-m) should be provided")
