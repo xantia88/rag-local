@@ -5,7 +5,7 @@
 2. Install llama3 LLM and Nomic embeddings models
 
 ```
-ollama pull llama3
+ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 ```
 

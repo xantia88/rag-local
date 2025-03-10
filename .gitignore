@@ -4,3 +4,5 @@ __pycache__
 logs/*
 embeddings/*
 .vscode/*
+test.py
+agent.py
